@@ -1,0 +1,29 @@
+
+install.packages("rattle")
+install.packages("rpart.plot")
+install.packages("RColorBrewer")
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
+
+
+evtest <- data.frame(evangelical, bible, attend, sex, race, incom16, age, educ, childs, marital)
+shuffled <- GSS[sample(n),]
+train_indices <- 1:round(0.7 * n)
+train <- shuffled[train_indices, ]
+test_indices <- (round(0.7 * n) +1):n
+test <- shuffled[test_indices, ]
+set.seed(1)
+tree <- rpart(evangelical ~., train, method = "class")
+fancyRpartPlot(tree)
+pred <- predict(tree, test, type = "class")
+conf <- table(test$evangelical, pred)
+sum(diag(conf)) / sum(conf)
+tree <- rpart(evangelical ~ ., train, method = "class", control = rpart.control(cp=0.00001))
+fancyRpartPlot(tree)
+pruned <- prune(tree, cp = .01)
+fancyRpartPlot(pruned)
+sum(diag(conf)) / sum(conf)
+pred <- predict(pruned, test, type = "class")
+conf <-table(test$evangelical, pred)
+sum(diag(conf)) / sum(conf)
